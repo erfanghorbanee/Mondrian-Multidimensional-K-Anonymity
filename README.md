@@ -5,3 +5,8 @@
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
 
 An application of the "Mondrian Multidimensional K-Anonymity" article in Python.
+
+
+## Resources
+
+- [Mondrian Multidimensional K-Anonymity by K. LeFevre; D.J. DeWitt; R. Ramakrishnan](https://ieeexplore.ieee.org/abstract/document/1617393)
