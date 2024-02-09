@@ -80,33 +80,15 @@ def choose_dimension(normalized_ranges: Dict[str, float]) -> str:
 def find_median(frequencySetData):
     '''calculate the split value which is the median of partition projected on dimension'''
 
-    return sum(frequencySetData.values()) / len(frequencySetData.keys())
+    return sum(frequencySetData) / len(frequencySetData)
 
 
 def left_hand_side(partition, dimension, splitValue):
-    return [i for i in partition[dimension] if i <= splitValue]
-
+    return partition[partition[dimension] <= splitValue]
 
 
 def right_hand_side(partition, dimension, splitValue):
-    return [i for i in partition[dimension] if i > splitValue]
-
-
-def anonymize(partition, k):
-    normalized_ranges = normalize_range(partition)
-    dimension = choose_dimension(normalized_ranges)
-
-    print(is_allowable_to_cut(partition, k, dimension))
-    if is_allowable_to_cut(partition, k, dimension):
-        frequnceData = frequency_set(partition, dimension)
-        splitValue = find_median(frequnceData)
-        left = left_hand_side(partition, dimension, splitValue)
-        right = right_hand_side(partition, dimension, splitValue)
-        anonymize(left, k)
-        anonymize(right, k)
-    else:
-        return partition
-
+    return partition[partition[dimension] > splitValue]
 
 
 def is_allowable_to_cut(partition, k, dimension):
@@ -121,4 +103,23 @@ def is_allowable_to_cut(partition, k, dimension):
         return False
 
 
-print(anonymize(data_df, 2))
+def anonymize(partition, k):
+    normalized_ranges = normalize_range(partition)
+    dimension = choose_dimension(normalized_ranges)
+
+    if is_allowable_to_cut(partition, k, dimension):
+        frequnceData = frequency_set(partition, dimension)
+        splitValue = find_median(frequnceData)
+        left = left_hand_side(partition, dimension, splitValue)
+        right = right_hand_side(partition, dimension, splitValue)
+        anonymize(left, k)
+        anonymize(right, k)
+    else:
+        print(partition)
+        print("**********")
+        return partition
+
+
+
+
+anonymize(data_df, 2)
