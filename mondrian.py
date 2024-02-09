@@ -67,8 +67,9 @@ def normalize_range(partition: pd.DataFrame) -> Dict[str, float]:
             normalized_range = 0
 
         normalized_ranges[column] = round(normalized_range, 5)
+        sorted_normalized_ranges = dict(sorted(normalized_ranges.items(), key=lambda item: item[1], reverse=True))
 
-    return normalized_ranges
+    return sorted_normalized_ranges
 
 
 def choose_dimension(normalized_ranges: Dict[str, float]) -> str:
@@ -103,8 +104,7 @@ def is_allowable_to_cut(partition, k, dimension):
         return False
 
 
-def anonymize(partition, k):
-    normalized_ranges = normalize_range(partition)
+def anonymize(partition,normalized_ranges, k, depth=0):
     dimension = choose_dimension(normalized_ranges)
 
     if is_allowable_to_cut(partition, k, dimension):
@@ -112,14 +112,15 @@ def anonymize(partition, k):
         splitValue = find_median(frequnceData)
         left = left_hand_side(partition, dimension, splitValue)
         right = right_hand_side(partition, dimension, splitValue)
-        anonymize(left, k)
-        anonymize(right, k)
+        depth+=1
+        return pd.concat([anonymize(left,normalized_ranges, k, depth), anonymize(right,normalized_ranges, k, depth)])
+
     else:
-        print(partition)
-        print("**********")
+        if depth == 0 and len(normalized_ranges) > 1:
+            del normalized_ranges[dimension]
+            anonymize(partition,normalized_ranges, k)
+
         return partition
 
-
-
-
-anonymize(data_df, 2)
+normalized_ranges = normalize_range(data_df)
+print(anonymize(data_df,normalized_ranges, 2))
