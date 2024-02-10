@@ -3,38 +3,8 @@ from typing import Dict
 
 import pandas as pd
 
-data_dict = {
-    "id": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-    "name": [
-        "Anthony Bowen",
-        "Melissa Brock",
-        "Sig.ra Eva Salata",
-        "Joshua Vargas",
-        "Sig. Ottavio Malaparte",
-        "Tina Marinetti",
-        "Anthony Rangel",
-        "Eva Grifeo",
-        "Heather Romero",
-        "Patricia Walton",
-    ],
-    "age": [27, 29, 26, 29, 33, 35, 21, 33, 37, 29],
-    "sex": ["F", "F", "F", "M", "M", "M", "M", "F", "F", "M"],
-    "zip_code": [26128, 25973, 30792, 28940, 80591, 49346, 56817, 76710, 92459, 78786],
-    "disease": [
-        "Measles",
-        "Diabetes",
-        "Measles",
-        "Lyme Disease",
-        "Malaria",
-        "Dengue Fever",
-        "Measles",
-        "Influenza",
-        "Alzheimer's Disease",
-        "Cancer",
-    ],
-}
-
-data_df = pd.DataFrame(data_dict)
+# Read data from data/dataset.csv file and store it in a pandas DataFrame
+data_df = pd.read_csv('data/dataset.csv')
 
 # Remove 'id' column
 data_df = data_df.drop("id", axis=1)
