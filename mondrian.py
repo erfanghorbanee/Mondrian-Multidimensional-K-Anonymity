@@ -1,3 +1,4 @@
+import statistics
 from typing import Dict
 
 import pandas as pd
@@ -67,21 +68,25 @@ def normalize_range(partition: pd.DataFrame) -> Dict[str, float]:
             normalized_range = 0
 
         normalized_ranges[column] = round(normalized_range, 5)
-        sorted_normalized_ranges = dict(sorted(normalized_ranges.items(), key=lambda item: item[1], reverse=True))
+        sorted_normalized_ranges = dict(
+            sorted(normalized_ranges.items(), key=lambda item: item[1], reverse=True)
+        )
 
     return sorted_normalized_ranges
 
 
-def choose_dimension(normalized_ranges: Dict[str, float]) -> str:
-    """Return the dimension with the largest normalized range."""
+# def choose_dimension(normalized_ranges: Dict[str, float]) -> str:
+#     """Return the dimension with the largest normalized range."""
 
-    return max(normalized_ranges, key=normalized_ranges.get)
+#     return max(normalized_ranges, key=normalized_ranges.get)
 
 
 def find_median(frequencySetData):
-    '''calculate the split value which is the median of partition projected on dimension'''
-
-    return sum(frequencySetData) / len(frequencySetData)
+    """calculate the split value which is the median of partition projected on dimension.
+    The median is the central number of a data set. Arrange data points from smallest to largest
+    and locate the central number. This is the median.
+    """
+    return statistics.median(frequencySetData)
 
 
 def left_hand_side(partition, dimension, splitValue):
@@ -104,23 +109,34 @@ def is_allowable_to_cut(partition, k, dimension):
         return False
 
 
-def anonymize(partition,normalized_ranges, k, depth=0):
-    dimension = choose_dimension(normalized_ranges)
+def anonymize(partition, dimension, k):
 
     if is_allowable_to_cut(partition, k, dimension):
         frequnceData = frequency_set(partition, dimension)
         splitValue = find_median(frequnceData)
         left = left_hand_side(partition, dimension, splitValue)
         right = right_hand_side(partition, dimension, splitValue)
-        depth+=1
-        return pd.concat([anonymize(left,normalized_ranges, k, depth), anonymize(right,normalized_ranges, k, depth)])
+        return pd.concat(
+            [anonymize(left, dimension, k), anonymize(right, dimension, k)]
+        )
 
     else:
-        if depth == 0 and len(normalized_ranges) > 1:
-            del normalized_ranges[dimension]
-            anonymize(partition,normalized_ranges, k)
-
         return partition
 
-normalized_ranges = normalize_range(data_df)
-print(anonymize(data_df,normalized_ranges, 2))
+
+def anonymize_over_dimensions(partition, dimensions, k):
+    """for widest dimension, anonymize the partition and when not possible to cut,
+    anonymize the resulted partiotion with the next dimension
+    till all dimensions are anonymized.
+    """
+
+    for dimension in dimensions:
+        partition = anonymize(partition, dimension, k)
+        print(dimension)
+        print(partition)
+        print("-------------------")
+    return partition
+
+
+dimensions = normalize_range(data_df)
+anonymize_over_dimensions(data_df, dimensions, 2)
