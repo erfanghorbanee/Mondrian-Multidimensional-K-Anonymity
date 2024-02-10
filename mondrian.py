@@ -3,8 +3,17 @@ from typing import Dict
 
 import pandas as pd
 
-# Read data from data/dataset.csv file and store it in a pandas DataFrame
-data_df = pd.read_csv('data/dataset.csv')
+# Data as seen in the provided image
+data = {
+    "id": [0, 1, 2, 3, 4, 5],
+    "Age": [25, 25, 26, 27, 27, 28],
+    "Sex": ["Male", "Female", "Male", "Male", "Female", "Male"],
+    "Zipcode": [53711, 53712, 53711, 53710, 53712, 53711],
+    "Disease": ["Flu", "Hepatitis", "Brochitis", "Broken Arm", "AIDS", "Hang Nail"],
+}
+
+# Create a DataFrame
+data_df = pd.DataFrame(data)
 
 # Remove 'id' column
 data_df = data_df.drop("id", axis=1)
