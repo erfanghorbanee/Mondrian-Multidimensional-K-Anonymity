@@ -15,6 +15,8 @@ data = {
 # Create a DataFrame
 data_df = pd.DataFrame(data)
 
+#data_df.to_csv("D:/UniGe/DataProtection/Mondrian-Multidimensional-K-Anonymity/data.csv", index=False)
+
 # Remove 'id' column
 data_df = data_df.drop("id", axis=1)
 
@@ -100,7 +102,7 @@ def anonymize(partition, dimension, k):
         )
 
     else:
-        return partition
+        return generalize(partition , dimension)
 
 
 def anonymize_over_dimensions(partition, dimensions, k):
@@ -115,6 +117,17 @@ def anonymize_over_dimensions(partition, dimensions, k):
         print(partition)
         print("-------------------")
     return partition
+
+def generalize(partition , dimension):
+    min_value = partition[dimension].min()
+    max_value = partition[dimension].max()
+    if min_value == max_value:
+        return partition
+    else:
+        generalized_value = f"{min_value} - {max_value}"
+        partition[dimension] = partition[dimension].apply(lambda x: generalized_value)
+        return partition
+            
 
 
 dimensions = normalize_range(data_df)
