@@ -15,7 +15,7 @@ data = {
 # Create a DataFrame
 data_df = pd.DataFrame(data)
 
-#data_df.to_csv("D:/UniGe/DataProtection/Mondrian-Multidimensional-K-Anonymity/data.csv", index=False)
+# data_df.to_csv("D:/UniGe/DataProtection/Mondrian-Multidimensional-K-Anonymity/data.csv", index=False)
 
 # Remove 'id' column
 data_df = data_df.drop("id", axis=1)
@@ -27,39 +27,29 @@ def frequency_set(partition: pd.DataFrame, dimention: str) -> Dict[str, int]:
     return frequency
 
 
-def normalize_range(partition: pd.DataFrame) -> Dict[str, float]:
-    """Calculate the normalized range for each numerical column (dimension)
-    in the partition and return as a dictionary."""
+def normalize_data(df):
+    """Normalize the data and return mappings of original to normalized values."""
+    result = df.copy()
+    mapping = {}
 
-    normalized_ranges: Dict[str, float] = {}
+    for dimension in df.select_dtypes(include=["int64", "float64"]).columns:
+        max_value = df[dimension].max()
+        min_value = df[dimension].min()
 
-    # Find maximum and minimum values across all numerical dimensions
-    max_value = partition.select_dtypes(include=["int64", "float64"]).max().max()
-    min_value = partition.select_dtypes(include=["int64", "float64"]).min().min()
+        # Add to mapping
+        unique_values = df[dimension].unique()
+        mapping[dimension] = {
+            original: round((original - min_value) / (max_value - min_value), 4)
+            for original in unique_values
+        }
 
-    # For each numerical column, calculate normalized ranges
-    for column in partition.select_dtypes(include=["int64", "float64"]).columns:
-
-        column_range = partition[column].max() - partition[column].min()
-
-        # Avoid division by zero
-        if max_value != min_value:
-            normalized_range = column_range / (max_value - min_value)
-        else:
-            normalized_range = 0
-
-        normalized_ranges[column] = round(normalized_range, 5)
-        sorted_normalized_ranges = dict(
-            sorted(normalized_ranges.items(), key=lambda item: item[1], reverse=True)
-        )
-
-    return sorted_normalized_ranges
+    return mapping
 
 
-# def choose_dimension(normalized_ranges: Dict[str, float]) -> str:
-#     """Return the dimension with the largest normalized range."""
+def choose_dimension(normalized_ranges: Dict[str, float]) -> str:
+    """Return the dimension with the largest normalized range."""
 
-#     return max(normalized_ranges, key=normalized_ranges.get)
+    return max(normalized_ranges, key=normalized_ranges.get)
 
 
 def find_median(frequencySetData):
@@ -90,6 +80,17 @@ def is_allowable_to_cut(partition, k, dimension):
         return False
 
 
+def generalize(partition, dimension):
+    min_value = partition[dimension].min()
+    max_value = partition[dimension].max()
+    if min_value == max_value:
+        return partition
+    else:
+        generalized_value = f"{min_value} - {max_value}"
+        partition[dimension] = partition[dimension].apply(lambda x: generalized_value)
+        return partition
+
+
 def anonymize(partition, dimension, k):
 
     if is_allowable_to_cut(partition, k, dimension):
@@ -102,7 +103,9 @@ def anonymize(partition, dimension, k):
         )
 
     else:
-        return generalize(partition , dimension)
+        print(dimension)
+        print(partition, "\n")
+        return partition
 
 
 def anonymize_over_dimensions(partition, dimensions, k):
@@ -114,21 +117,12 @@ def anonymize_over_dimensions(partition, dimensions, k):
     for dimension in dimensions:
         partition = anonymize(partition, dimension, k)
         print(dimension)
-        print(partition)
-        print("-------------------")
+        # print(partition)
+        # print("-------------------")
     return partition
 
-def generalize(partition , dimension):
-    min_value = partition[dimension].min()
-    max_value = partition[dimension].max()
-    if min_value == max_value:
-        return partition
-    else:
-        generalized_value = f"{min_value} - {max_value}"
-        partition[dimension] = partition[dimension].apply(lambda x: generalized_value)
-        return partition
-            
 
+print(normalize_data(data_df))
 
-dimensions = normalize_range(data_df)
-anonymize_over_dimensions(data_df, dimensions, 2)
+# dimensions = normalize_range(data_df)
+# anonymize_over_dimensions(data_df, dimensions, 2)
