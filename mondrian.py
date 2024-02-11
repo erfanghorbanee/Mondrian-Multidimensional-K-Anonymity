@@ -1,4 +1,5 @@
 import statistics
+import warnings
 from typing import Dict
 
 import pandas as pd
@@ -93,20 +94,26 @@ def generalize(partition, exclude_columns):
         if dimension not in exclude_columns:
             unique_values = partition[dimension].unique()
             generalized_value = "-".join(unique_values)
-            partition[dimension] = generalized_value
+            partition.loc[:, dimension] = generalized_value
 
     # Numerical generalize
     for dimension in partition.select_dtypes(include=["int64", "float64"]).columns:
         min_value = partition[dimension].min()
         max_value = partition[dimension].max()
+
         if min_value == max_value:
             continue
         else:
             generalized_value = f"{min_value} - {max_value}"
-            partition[dimension] = generalized_value
+
+            warnings.filterwarnings("ignore", category=FutureWarning)
+            partition.loc[:, dimension] = generalized_value
+            warnings.filterwarnings("default", category=FutureWarning)
+
     return partition
 
 
+# Calculate mapping for normalization so we can set it by default in anonymize function
 mapping = normalize_data(data_df)
 
 
