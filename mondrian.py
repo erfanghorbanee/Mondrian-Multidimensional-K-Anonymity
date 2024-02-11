@@ -3,17 +3,8 @@ from typing import Dict
 
 import pandas as pd
 
-# Data as seen in the provided image
-data = {
-    "id": [0, 1, 2, 3, 4, 5],
-    "Age": [25, 25, 26, 27, 27, 28],
-    "Sex": ["Male", "Female", "Male", "Male", "Female", "Male"],
-    "Zipcode": [53711, 53712, 53711, 53710, 53712, 53711],
-    "Disease": ["Flu", "Hepatitis", "Brochitis", "Broken Arm", "AIDS", "Hang Nail"],
-}
-
-# Create a DataFrame
-data_df = pd.DataFrame(data)
+# Read data from data/dataset.csv file and store it in a pandas DataFrame
+data_df = pd.read_csv("data/dataset.csv")
 
 # data_df.to_csv("D:/UniGe/DataProtection/Mondrian-Multidimensional-K-Anonymity/data.csv", index=False)
 
@@ -29,7 +20,7 @@ def frequency_set(partition: pd.DataFrame, dimention: str) -> Dict[str, int]:
 
 def normalize_data(df):
     """Normalize the data and return mappings of original to normalized values."""
-    result = df.copy()
+
     mapping = {}
 
     for dimension in df.select_dtypes(include=["int64", "float64"]).columns:
@@ -46,10 +37,26 @@ def normalize_data(df):
     return mapping
 
 
-def choose_dimension(normalized_ranges: Dict[str, float]) -> str:
+def choose_dimension(partition, map):
     """Return the dimension with the largest normalized range."""
 
-    return max(normalized_ranges, key=normalized_ranges.get)
+    max_range = 0
+    choosen_dimension = ""
+
+    for dimension in partition.select_dtypes(include=["int64", "float64"]).columns:
+        max_value = partition[dimension].max()
+        min_value = partition[dimension].min()
+
+        # get normalized values from map and calculate their range
+        normalize_max_value = map[dimension][max_value]
+        normalize_min_value = map[dimension][min_value]
+        range = normalize_max_value - normalize_min_value
+
+        if range > max_range:
+            max_range = range
+            choosen_dimension = dimension
+
+    return choosen_dimension
 
 
 def find_median(frequencySetData):
@@ -80,49 +87,36 @@ def is_allowable_to_cut(partition, k, dimension):
         return False
 
 
-def generalize(partition, dimension):
-    min_value = partition[dimension].min()
-    max_value = partition[dimension].max()
-    if min_value == max_value:
-        return partition
-    else:
-        generalized_value = f"{min_value} - {max_value}"
-        partition[dimension] = partition[dimension].apply(lambda x: generalized_value)
-        return partition
+def generalize(partition):
+    for dimension in partition.select_dtypes(include=["int64", "float64"]).columns:
+        min_value = partition[dimension].min()
+        max_value = partition[dimension].max()
+        if min_value == max_value:
+            continue
+        else:
+            generalized_value = f"{min_value} - {max_value}"
+            partition[dimension] = partition[dimension].apply(
+                lambda x: generalized_value
+            )
+
+    return partition
 
 
-def anonymize(partition, dimension, k):
+mapping = normalize_data(data_df)
 
+
+def anonymize(partition, k, map=mapping):
+    dimension = choose_dimension(partition, map)
+    print(dimension)
     if is_allowable_to_cut(partition, k, dimension):
         frequnceData = frequency_set(partition, dimension)
         splitValue = find_median(frequnceData)
         left = left_hand_side(partition, dimension, splitValue)
         right = right_hand_side(partition, dimension, splitValue)
-        return pd.concat(
-            [anonymize(left, dimension, k), anonymize(right, dimension, k)]
-        )
+        return pd.concat([anonymize(left, k), anonymize(right, k)])
 
     else:
-        print(dimension)
-        print(partition, "\n")
-        return partition
+        return generalize(partition)
 
 
-def anonymize_over_dimensions(partition, dimensions, k):
-    """for widest dimension, anonymize the partition and when not possible to cut,
-    anonymize the resulted partiotion with the next dimension
-    till all dimensions are anonymized.
-    """
-
-    for dimension in dimensions:
-        partition = anonymize(partition, dimension, k)
-        print(dimension)
-        # print(partition)
-        # print("-------------------")
-    return partition
-
-
-print(normalize_data(data_df))
-
-# dimensions = normalize_range(data_df)
-# anonymize_over_dimensions(data_df, dimensions, 2)
+print(anonymize(data_df, 2))
