@@ -5,18 +5,20 @@ from typing import Dict
 import pandas as pd
 
 # Read data from data/dataset.csv file and store it in a pandas DataFrame
-data_df = pd.read_csv("data/dataset.csv")
-
+#data_df = pd.read_csv("data/dataset.csv")
+data_df = pd.read_csv("data/adult.csv")
 # data_df.to_csv("D:/UniGe/DataProtection/Mondrian-Multidimensional-K-Anonymity/data.csv", index=False)
 
 # Remove 'id' column
-data_df = data_df.drop("id", axis=1)
+#data_df = data_df.drop("id", axis=1)
 
 
-def frequency_set(partition: pd.DataFrame, dimention: str) -> Dict[str, int]:
+def frequency_set(partition: pd.DataFrame, dimension: str) -> Dict[str, int]:
     # counts all unique value in partition
-    frequency = partition[dimention].value_counts().to_dict()
+    frequency = partition[dimension].value_counts().to_dict()
     return frequency
+    
+
 
 
 def normalize_data(df):
@@ -41,7 +43,7 @@ def normalize_data(df):
 def choose_dimension(partition, map):
     """Return the dimension with the largest normalized range."""
 
-    max_range = 0
+    max_range = -1
     choosen_dimension = ""
 
     for dimension in partition.select_dtypes(include=["int64", "float64"]).columns:
@@ -133,4 +135,5 @@ def anonymize(partition, k, exclude_columns=[], map=mapping):
         return generalize(partition, exclude_columns)
 
 
-print(anonymize(data_df, 2, exclude_columns=["name", "disease"]))
+#print(anonymize(data_df, 2, exclude_columns=["name", "disease"]))
+print(anonymize(data_df , 2 , exclude_columns = ["class"]))
