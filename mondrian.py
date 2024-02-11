@@ -87,15 +87,15 @@ def is_allowable_to_cut(partition, k, dimension):
         return False
 
 
-def generalize(partition , exclude_columns):
-    #Categorical generalize
+def generalize(partition, exclude_columns):
+    # Categorical generalize
     for dimension in partition.select_dtypes(include=["object", "string"]).columns:
         if dimension not in exclude_columns:
             unique_values = partition[dimension].unique()
-            generalized_value = '-'.join(unique_values)
-            partition[dimension] = partition[dimension].apply(lambda x: generalized_value)
+            generalized_value = "-".join(unique_values)
+            partition[dimension] = generalized_value
 
-    #Numerical generalize
+    # Numerical generalize
     for dimension in partition.select_dtypes(include=["int64", "float64"]).columns:
         min_value = partition[dimension].min()
         max_value = partition[dimension].max()
@@ -103,16 +103,14 @@ def generalize(partition , exclude_columns):
             continue
         else:
             generalized_value = f"{min_value} - {max_value}"
-            partition[dimension] = partition[dimension].apply(
-                lambda x: generalized_value
-            )
+            partition[dimension] = generalized_value
     return partition
 
 
 mapping = normalize_data(data_df)
 
 
-def anonymize(partition, k, exclude_columns = [],map=mapping):
+def anonymize(partition, k, exclude_columns=[], map=mapping):
     dimension = choose_dimension(partition, map)
 
     if is_allowable_to_cut(partition, k, dimension):
@@ -120,10 +118,12 @@ def anonymize(partition, k, exclude_columns = [],map=mapping):
         splitValue = find_median(frequnceData)
         left = left_hand_side(partition, dimension, splitValue)
         right = right_hand_side(partition, dimension, splitValue)
-        return pd.concat([anonymize(left, k , exclude_columns), anonymize(right, k , exclude_columns)])
+        return pd.concat(
+            [anonymize(left, k, exclude_columns), anonymize(right, k, exclude_columns)]
+        )
 
     else:
-        return generalize(partition , exclude_columns)
+        return generalize(partition, exclude_columns)
 
 
-print(anonymize(data_df, 2 , exclude_columns=['name','disease']))
+print(anonymize(data_df, 2, exclude_columns=["name", "disease"]))
