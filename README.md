@@ -14,4 +14,4 @@ An application of the "Mondrian Multidimensional K-Anonymity" article in Python.
 
 ### Dataset
 
-[Adults database from the UC Irvine Machine Learning Repository](https://archive.ics.uci.edu/dataset/2/adult)
+- [Adults database from the UC Irvine Machine Learning Repository](https://archive.ics.uci.edu/dataset/2/adult)
