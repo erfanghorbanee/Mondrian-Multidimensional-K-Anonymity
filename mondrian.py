@@ -157,11 +157,19 @@ parser.add_argument(
     "--k", type=int, default=2, help="The k value for k-anonymity (default: 2)"
 )
 
+parser.add_argument(
+    "--input",
+    type=str,
+    default="data/adult.csv",
+    help="Input csv file path (default: data/adult.csv)",
+)
+
 args = parser.parse_args()
 
 
 # Read data from data/*.csv file and store it in a pandas DataFrame
-data_df = pd.read_csv("data/adult.csv")
+data_directory = args.input
+data_df = pd.read_csv(data_directory)
 
 # Calculate mapping for normalization
 mapping = normalize_data(data_df)
@@ -177,8 +185,14 @@ for e in args.ei:
         exit()
 
 
+print("⏳ Anonymizing data, it may take a while...")
+
 # Anonymize and save the result in data/output.csv
 anonymized_data = anonymize(
     data_df, args.k, map=mapping, exclude_columns=args.sensitive_data
 )
+
 anonymized_data.to_csv("data/output.csv", index=False)
+
+print("✅ Process finished successfully.")
+print("📁 Anonymized data is saved in data/output.csv")
