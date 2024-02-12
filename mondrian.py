@@ -1,24 +1,15 @@
+import argparse
 import statistics
 import warnings
 from typing import Dict
 
 import pandas as pd
 
-# Read data from data/dataset.csv file and store it in a pandas DataFrame
-#data_df = pd.read_csv("data/dataset.csv")
-data_df = pd.read_csv("data/adult.csv")
-# data_df.to_csv("D:/UniGe/DataProtection/Mondrian-Multidimensional-K-Anonymity/data.csv", index=False)
-
-# Remove 'id' column
-#data_df = data_df.drop("id", axis=1)
-
 
 def frequency_set(partition: pd.DataFrame, dimension: str) -> Dict[str, int]:
     # counts all unique value in partition
     frequency = partition[dimension].value_counts().to_dict()
     return frequency
-    
-
 
 
 def normalize_data(df):
@@ -100,26 +91,23 @@ def generalize(partition, exclude_columns):
 
     # Numerical generalize
     for dimension in partition.select_dtypes(include=["int64", "float64"]).columns:
-        min_value = partition[dimension].min()
-        max_value = partition[dimension].max()
+        if dimension not in exclude_columns:
+            min_value = partition[dimension].min()
+            max_value = partition[dimension].max()
 
-        if min_value == max_value:
-            continue
-        else:
-            generalized_value = f"{min_value} - {max_value}"
+            if min_value == max_value:
+                continue
+            else:
+                generalized_value = f"{min_value} - {max_value}"
 
-            warnings.filterwarnings("ignore", category=FutureWarning)
-            partition.loc[:, dimension] = generalized_value
-            warnings.filterwarnings("default", category=FutureWarning)
+                warnings.filterwarnings("ignore", category=FutureWarning)
+                partition.loc[:, dimension] = generalized_value
+                warnings.filterwarnings("default", category=FutureWarning)
 
     return partition
 
 
-# Calculate mapping for normalization so we can set it by default in anonymize function
-mapping = normalize_data(data_df)
-
-
-def anonymize(partition, k, exclude_columns=[], map=mapping):
+def anonymize(partition, k, map, exclude_columns=[]):
     dimension = choose_dimension(partition, map)
 
     if is_allowable_to_cut(partition, k, dimension):
@@ -128,12 +116,69 @@ def anonymize(partition, k, exclude_columns=[], map=mapping):
         left = left_hand_side(partition, dimension, splitValue)
         right = right_hand_side(partition, dimension, splitValue)
         return pd.concat(
-            [anonymize(left, k, exclude_columns), anonymize(right, k, exclude_columns)]
+            [
+                anonymize(left, k, map, exclude_columns),
+                anonymize(right, k, map, exclude_columns),
+            ]
         )
 
     else:
         return generalize(partition, exclude_columns)
 
 
-#print(anonymize(data_df, 2, exclude_columns=["name", "disease"]))
-print(anonymize(data_df , 2 , exclude_columns = ["class"]))
+# ===========Main Program=================
+
+parser = argparse.ArgumentParser(
+    description="An application of 'Mondrian Multidimensional K-Anonymity' article in Python"
+)
+
+# Explicit Identifiers
+parser.add_argument(
+    "--ei",
+    metavar="Explicit Identifier",
+    type=str,
+    nargs="+",
+    default=[],
+    help="Explicit Identifiers to be removed from dataset (example: --ei id name)",
+)
+
+# Sensitive Data
+parser.add_argument(
+    "--sensitive-data",
+    metavar="Sensitive Data",
+    type=str,
+    nargs="+",
+    default=[],
+    help="Sensitive Data you dont't want to anonymize to maintain utility (example: --sensitive-data salary)",
+)
+
+# K
+parser.add_argument(
+    "--k", type=int, default=2, help="The k value for k-anonymity (default: 2)"
+)
+
+args = parser.parse_args()
+
+
+# Read data from data/*.csv file and store it in a pandas DataFrame
+data_df = pd.read_csv("data/adult.csv")
+
+# Calculate mapping for normalization
+mapping = normalize_data(data_df)
+
+# Drop Explicit Identifiers if exist in the dataset
+column_names = data_df.columns.tolist()
+
+for e in args.ei:
+    if e in column_names:
+        data_df = data_df.drop(e, axis=1)
+    else:
+        print(f"{e} explicit identifier was not found in data columns")
+        exit()
+
+
+# Anonymize and save the result in data/output.csv
+anonymized_data = anonymize(
+    data_df, args.k, map=mapping, exclude_columns=args.sensitive_data
+)
+anonymized_data.to_csv("data/output.csv", index=False)
