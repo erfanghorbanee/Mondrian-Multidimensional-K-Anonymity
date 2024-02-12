@@ -6,7 +6,12 @@
 
 An application of the "Mondrian Multidimensional K-Anonymity" article in Python.
 
-
 ## Resources
 
+### Article
+
 - [Mondrian Multidimensional K-Anonymity by K. LeFevre; D.J. DeWitt; R. Ramakrishnan](https://ieeexplore.ieee.org/abstract/document/1617393)
+
+### Dataset
+
+[Adults database from the UC Irvine Machine Learning Repository](https://archive.ics.uci.edu/dataset/2/adult)
