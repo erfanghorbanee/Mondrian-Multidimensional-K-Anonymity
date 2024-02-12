@@ -13,7 +13,7 @@ def frequency_set(partition: pd.DataFrame, dimension: str) -> Dict[str, int]:
 
 
 def normalize_data(df):
-    """Normalize the data and return mappings of original to normalized values."""
+    """Normalize the data using Min-Max Normalization method and return mappings of original to normalized values."""
 
     mapping = {}
 
@@ -107,7 +107,10 @@ def generalize(partition, exclude_columns):
     return partition
 
 
+total_equivalence_classes = 0
 def anonymize(partition, k, map, exclude_columns=[]):
+    global total_equivalence_classes
+
     dimension = choose_dimension(partition, map)
 
     if is_allowable_to_cut(partition, k, dimension):
@@ -123,7 +126,9 @@ def anonymize(partition, k, map, exclude_columns=[]):
         )
 
     else:
+        total_equivalence_classes += 1
         return generalize(partition, exclude_columns)
+
 
 
 # ===========Main Program=================
@@ -171,8 +176,6 @@ args = parser.parse_args()
 data_directory = args.input
 data_df = pd.read_csv(data_directory)
 
-# Calculate mapping for normalization
-mapping = normalize_data(data_df)
 
 # Drop Explicit Identifiers if exist in the dataset
 column_names = data_df.columns.tolist()
@@ -185,14 +188,29 @@ for e in args.ei:
         exit()
 
 
-print("⏳ Anonymizing data, it may take a while...")
+print("⏳ Anonymizing data, it may take a while...\n")
+
+# Calculate mapping for normalization
+mapping = normalize_data(data_df)
 
 # Anonymize and save the result in data/output.csv
 anonymized_data = anonymize(
     data_df, args.k, map=mapping, exclude_columns=args.sensitive_data
 )
 
+print(f"🛡️  K value for anonymity: {args.k}")
+
+# Calculate normalized average equivalence class metric
+total_records = len(data_df)
+c_avg = (total_records / total_equivalence_classes) / args.k
+
+print(f"📊 Total Records: {total_records}")
+print(f"📊 Total Equivalence Classes: {total_equivalence_classes}")
+print(f"📊 Normalized Average Equivalence Class Metric: {c_avg:.2f}")
+
+
+# Save anonymized data to data/output.csv
 anonymized_data.to_csv("data/output.csv", index=False)
 
-print("✅ Process finished successfully.")
+print("\n✅ Process finished successfully.")
 print("📁 Anonymized data is saved in data/output.csv")
