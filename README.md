@@ -50,8 +50,6 @@ python3 mondrian.py --help
 ```
 
 ```bash
-python3 mondrian.py --help
-
 usage: mondrian.py [-h] [--ei Explicit Identifier [Explicit Identifier ...]]
                    [--sensitive-data Sensitive Data [Sensitive Data ...]] [--k K] [--input INPUT] [--test]
 
