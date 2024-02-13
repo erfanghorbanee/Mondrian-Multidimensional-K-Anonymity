@@ -6,35 +6,35 @@
 
 An application of the "Mondrian Multidimensional K-Anonymity" article in Python.
 
-## How to run the project?
+## Installation
 
-### Clone the repository
+Clone the repository and set up a virtual environment:
 
 ```bash
 git clone https://github.com/erfanghorbanee/Mondrian-Multidimensional-K-Anonymity.git
 cd Mondrian-Multidimensional-K-Anonymity
 ```
 
-### Create a virtualenv and activate it
-
 ```bash
 python3 -m venv venv
 . venv/bin/activate
 ```
 
-### Install the requirements
+Install the requirements:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Run the script
+## Usage
+
+To run the Mondrian anonymization process on your data:
 
 ```bash
-python3 mondrian.py --sensitive-data class
+python3 mondrian.py --input data/adult.csv --sensitive-data class
 ```
 
-### You can also get an illustration of c-avg metric for different k values using data/adult.csv file
+You can also get an illustration of c-avg metric for different k values using [data/adult.csv](https://github.com/erfanghorbanee/Mondrian-Multidimensional-K-Anonymity/blob/main/data/adult.csv) file:
 
 ```bash
 python3 mondrian.py --test
@@ -44,10 +44,10 @@ python3 mondrian.py --test
 
 **Note that this is only an illustration of algorithm quality and will be generated using predefined data and the generated figure is always the same.**
 
-### To see the full list of commands run
+To see the full list of commands run:
 
 ```bash
-python3 mondrian.py --sensitive-data --help
+python3 mondrian.py --help
 ```
 
 ```bash
