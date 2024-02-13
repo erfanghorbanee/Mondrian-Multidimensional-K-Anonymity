@@ -3,6 +3,7 @@ import statistics
 import warnings
 from typing import Dict
 
+import matplotlib.pyplot as plt
 import pandas as pd
 
 
@@ -108,6 +109,8 @@ def generalize(partition, exclude_columns):
 
 
 total_equivalence_classes = 0
+
+
 def anonymize(partition, k, map, exclude_columns=[]):
     global total_equivalence_classes
 
@@ -128,7 +131,6 @@ def anonymize(partition, k, map, exclude_columns=[]):
     else:
         total_equivalence_classes += 1
         return generalize(partition, exclude_columns)
-
 
 
 # ===========Main Program=================
@@ -168,6 +170,13 @@ parser.add_argument(
     default="data/adult.csv",
     help="Input csv file path (default: data/adult.csv)",
 )
+
+parser.add_argument(
+    "--test",
+    action="store_true",
+    help="Draws an illustration of c-avg metric for different k values using data/adult.csv file.",
+)
+
 
 args = parser.parse_args()
 
@@ -214,3 +223,29 @@ anonymized_data.to_csv("data/output.csv", index=False)
 
 print("\n✅ Process finished successfully.")
 print("📁 Anonymized data is saved in data/output.csv")
+
+
+# illustrate a figure if --test flag is set with predefined data.
+if args.test:
+    print("\nCreating the figure for data/adult.csv ...")
+    data_df = pd.read_csv("data/adult.csv")
+    total_records = len(data_df)
+    mapping = normalize_data(data_df)
+
+    k_values = [5, 20, 40, 60, 80, 100]
+    c_avg_list = []
+
+    for k in k_values:
+        total_equivalence_classes = 0
+        anonymize(data_df, k, map=mapping, exclude_columns=["class"])
+
+        c_avg = (total_records / total_equivalence_classes) / k
+        c_avg_list.append(c_avg)
+
+    plt.plot(k_values, c_avg_list, marker="^", color="blue", label="Mondrian")
+    plt.xlabel("k")
+    plt.ylabel("Normalized Average Equivalence Class Metric")
+    plt.title("Comparison of c-avg for different k values")
+
+    plt.legend()
+    plt.show()
