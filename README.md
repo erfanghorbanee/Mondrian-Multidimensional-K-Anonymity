@@ -11,7 +11,6 @@ An application of the "Mondrian Multidimensional K-Anonymity" article in Python.
 Clone the repository and set up a virtual environment:
 
 ```bash
-git clone https://github.com/erfanghorbanee/Mondrian-Multidimensional-K-Anonymity.git
 cd Mondrian-Multidimensional-K-Anonymity
 ```
 
