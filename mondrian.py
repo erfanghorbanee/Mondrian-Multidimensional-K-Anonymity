@@ -156,7 +156,7 @@ parser.add_argument(
     type=str,
     nargs="+",
     default=[],
-    help="Sensitive Data you dont't want to anonymize to maintain utility (example: --sensitive-data salary)",
+    help="Sensitive Data you don't want to anonymize to maintain utility (example: --sensitive-data salary)",
 )
 
 # K
