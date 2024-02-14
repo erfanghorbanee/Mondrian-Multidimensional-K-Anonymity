@@ -8,7 +8,7 @@ import pandas as pd
 
 
 def frequency_set(partition: pd.DataFrame, dimension: str) -> Dict[str, int]:
-    # counts all unique value in partition
+    # Counts all unique dimension values in a given partition (example: {40: 2, 45: 1, 50: 1} for age dimension)
     frequency = partition[dimension].value_counts().to_dict()
     return frequency
 
