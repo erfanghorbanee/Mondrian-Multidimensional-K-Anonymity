@@ -1,7 +1,7 @@
 import argparse
 import statistics
 import warnings
-from typing import Dict
+from typing import Dict, List
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -13,7 +13,7 @@ def frequency_set(partition: pd.DataFrame, dimension: str) -> Dict[str, int]:
     return frequency
 
 
-def normalize_data(df):
+def normalize_data(df: pd.DataFrame) -> Dict[str, Dict[str, float]]:
     """Normalize the data using Min-Max Normalization method and return mappings of original to normalized values."""
 
     mapping = {}
@@ -32,7 +32,7 @@ def normalize_data(df):
     return mapping
 
 
-def choose_dimension(partition, map):
+def choose_dimension(partition: pd.DataFrame, map: Dict[str, Dict[str, float]]) -> str:
     """Return the dimension with the largest normalized range."""
 
     max_range = -1
@@ -54,7 +54,7 @@ def choose_dimension(partition, map):
     return choosen_dimension
 
 
-def find_median(frequencySetData):
+def find_median(frequencySetData) -> float:
     """calculate the split value which is the median of partition projected on dimension.
     The median is the central number of a data set. Arrange data points from smallest to largest
     and locate the central number. This is the median.
@@ -62,15 +62,19 @@ def find_median(frequencySetData):
     return statistics.median(frequencySetData)
 
 
-def left_hand_side(partition, dimension, splitValue):
+def left_hand_side(
+    partition: pd.DataFrame, dimension: str, splitValue: float
+) -> pd.DataFrame:
     return partition[partition[dimension] <= splitValue]
 
 
-def right_hand_side(partition, dimension, splitValue):
+def right_hand_side(
+    partition: pd.DataFrame, dimension: str, splitValue: float
+) -> pd.DataFrame:
     return partition[partition[dimension] > splitValue]
 
 
-def is_allowable_to_cut(partition, k, dimension):
+def is_allowable_to_cut(partition: pd.DataFrame, k: int, dimension: str) -> bool:
     frequnceData = frequency_set(partition, dimension)
     splitValue = find_median(frequnceData)
     if (
@@ -82,7 +86,7 @@ def is_allowable_to_cut(partition, k, dimension):
         return False
 
 
-def generalize(partition, exclude_columns):
+def generalize(partition: pd.DataFrame, exclude_columns: List[str]) -> pd.DataFrame:
     # Categorical generalize
     for dimension in partition.select_dtypes(include=["object", "string"]).columns:
         if dimension not in exclude_columns:
@@ -111,7 +115,12 @@ def generalize(partition, exclude_columns):
 total_equivalence_classes = 0
 
 
-def anonymize(partition, k, map, exclude_columns=[]):
+def anonymize(
+    partition: pd.DataFrame,
+    k: int,
+    map: Dict[str, Dict[str, float]],
+    exclude_columns=[],
+):
     global total_equivalence_classes
 
     dimension = choose_dimension(partition, map)
