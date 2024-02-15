@@ -1,5 +1,6 @@
 import argparse
 import statistics
+import time
 import warnings
 from typing import Dict, List
 
@@ -144,6 +145,8 @@ def anonymize(
 
 # ===========Main Program=================
 
+start_time = time.time()
+
 parser = argparse.ArgumentParser(
     description="An application of 'Mondrian Multidimensional K-Anonymity' article in Python"
 )
@@ -229,6 +232,11 @@ print(f"📊 Normalized Average Equivalence Class Metric: {c_avg:.2f}")
 
 # Save anonymized data to data/output.csv
 anonymized_data.to_csv("data/output.csv", index=False)
+
+# Calculate execution time
+end_time = time.time()
+execution_time = end_time - start_time
+print(f"⏱️  Execution Time: {execution_time:.2f} seconds\n")
 
 print("\n✅ Process finished successfully.")
 print("📁 Anonymized data is saved in data/output.csv")
