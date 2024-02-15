@@ -114,6 +114,7 @@ def generalize(partition: pd.DataFrame, exclude_columns: List[str]) -> pd.DataFr
 
 
 total_equivalence_classes = 0
+discernability_penalty = 0
 
 
 def anonymize(
@@ -123,6 +124,7 @@ def anonymize(
     exclude_columns=[],
 ):
     global total_equivalence_classes
+    global discernability_penalty
 
     dimension = choose_dimension(partition, map)
 
@@ -140,6 +142,8 @@ def anonymize(
 
     else:
         total_equivalence_classes += 1
+        discernability_penalty += len(partition) ** 2
+
         return generalize(partition, exclude_columns)
 
 
@@ -228,6 +232,7 @@ c_avg = (total_records / total_equivalence_classes) / args.k
 print(f"📊 Total Records: {total_records}")
 print(f"📊 Total Equivalence Classes: {total_equivalence_classes}")
 print(f"📊 Normalized Average Equivalence Class Metric: {c_avg:.2f}")
+print(f"Discernability Penalty: {discernability_penalty}")
 
 
 # Save anonymized data to data/output.csv
