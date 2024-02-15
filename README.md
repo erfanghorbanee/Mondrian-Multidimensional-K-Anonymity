@@ -76,3 +76,7 @@ options:
 ### Dataset
 
 - [Adults database from the UC Irvine Machine Learning Repository](https://archive.ics.uci.edu/dataset/2/adult)
+
+## Contribution
+
+Feel free to contribute in any way possible.
