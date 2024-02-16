@@ -232,7 +232,7 @@ c_avg = (total_records / total_equivalence_classes) / args.k
 print(f"📊 Total Records: {total_records}")
 print(f"📊 Total Equivalence Classes: {total_equivalence_classes}")
 print(f"📊 Normalized Average Equivalence Class Metric: {c_avg:.2f}")
-print(f"Discernability Penalty: {discernability_penalty}")
+print(f"📊 Discernability Penalty: {discernability_penalty}")
 
 
 # Save anonymized data to data/output.csv
