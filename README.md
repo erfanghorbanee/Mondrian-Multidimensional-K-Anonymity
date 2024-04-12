@@ -6,6 +6,8 @@
 
 An application of the "Mondrian Multidimensional K-Anonymity" article in Python.
 
+It provides a robust anonymization technique for protecting user privacy which prevents table joining attacks on datasets while preserving data utility.
+
 ## Installation
 
 Clone the repository and set up a virtual environment:
